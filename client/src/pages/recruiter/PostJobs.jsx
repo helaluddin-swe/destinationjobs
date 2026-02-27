@@ -24,7 +24,7 @@ const PostJobs = () => {
 
     try {
       // Axios handles the 'Content-Type' and JSON.stringify automatically
-      const response = await axios.post('/api/jobs', formData);
+      const response = await axios.post('/jobs', formData);
 
       if (response.status === 201 || response.status === 200) {
         setMessage({ text: 'Job posted successfully! 🎉', type: 'success' });

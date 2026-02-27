@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [react(),tailwindcss()],
   "server":{
     "proxy":{
-      "/api/jobs":{
+      "/jobs":{
         target:"http://localhost:5175",
         secure:false,
         changeOrigin:true

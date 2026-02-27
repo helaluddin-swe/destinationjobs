@@ -1,15 +1,12 @@
 {
   "rewrites": [
     {
-      "source": "/api/jobs/:path*",
-      "destination": "https://helaluddin-swe-destinationjobs-3yzu.vercel.app/api/items/:path*"
+      "source": "/jobs/:path*",
+      "destination": "https://helaluddin-swe-destinationjobs-3yzu.vercel.app/jobs/:path*"
     },
+   
     {
-      "source": "/api/mcq/:path*",
-      "destination": "hhttps://helaluddin-swe-destinationjobs-3yzu.vercel.app/api/mcq/:path*"
-    },
-    {
-      "source": "/((?!api|items|mcq).*)",
+      "source": "/((?!jobs|jobs).*)",
       "destination": "/"
     }
   ]

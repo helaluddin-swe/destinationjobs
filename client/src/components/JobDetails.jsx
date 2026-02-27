@@ -18,7 +18,7 @@ useEffect(() => {
     setLoading(true);
     try {
       // Axios automatically handles the JSON parsing
-      const response = await axios.get(`/api/jobs/${id}`);
+      const response = await axios.get(`/jobs/${id}`);
       
       // In Axios, the data you want is always under the .data property
       setJobData(response.data); 

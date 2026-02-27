@@ -22,7 +22,7 @@ const JobList = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get('/api/jobs');
+      const response = await axios.get('/jobs');
       
       // Safety check: ensure response.data is actually an array
       if (Array.isArray(response.data)) {

@@ -21,7 +21,7 @@ app.use(cors({
 connectDB();
 
 // routes placeholder
-app.use('/api', jobsRoutes);
+app.use( jobsRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
