@@ -1,0 +1,16 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/jobs/:path*",
+      "destination": "https://destinationbcs.vercel.app/api/items/:path*"
+    },
+    {
+      "source": "/api/mcq/:path*",
+      "destination": "https://destinationbcs.vercel.app/api/mcq/:path*"
+    },
+    {
+      "source": "/((?!api|items|mcq).*)",
+      "destination": "/"
+    }
+  ]
+}
