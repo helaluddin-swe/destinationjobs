@@ -1,28 +1,50 @@
-const mongoose =require('mongoose')
-const Schema=mongoose.Schema
-const QuestionExamSchema=new Schema({
-            question:{
-              type:String,
-              required:true,
-              trim:true
-            },
-            options:{type:[String],required:true,validate:{validator: function(value){
-              value.length>=4
-            },
-            message:'Options must have 4 options'
-          } },answer:{ 
-              type:String,
-              required:true,
-              trim:true
-            },
-              prevExams:{
-              type:[String],trim:true},
-              explanation1:{type:String,trim:true},
-              explanation2:{type:String,trim:true},
-              hints:{type:String,trim:true},
-  
-              topic:{type:[String],required:true,trim:true}
+const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
 
-},{timestamps:true})
-const Jobs=mongoose.model('JobsData',QuestionExamSchema)
-module.exports=Jobs
+const JobSchema = new Schema(
+  {
+    title: {
+      type: String,
+      required: [true, "Job title is required"],
+      trim: true,
+      index: true, // Makes searching by title faster
+    },
+    company: { 
+      type: String, // Changed from array to String
+      required: [true, "Company name is required"],
+      trim: true 
+    },
+    location: {
+      type: String, // Changed to String for easier filtering
+      required: [true, "Location is required"],
+      default: "Remote",
+      trim: true,
+    },
+    salary: { 
+      type: String, 
+      trim: true 
+    },
+    description: { 
+      type: String, 
+      required: [true, "Description is required"],
+      trim: true 
+    },
+    // Useful additions for a real app:
+    employmentType: {
+      type: String,
+      enum: ["Full-time", "Part-time", "Contract", "Internship"],
+      default: "Full-time"
+    },
+    isApplied: {
+      type: Boolean,
+      default: false
+    }
+  },
+  { timestamps: true } // Automatically creates createdAt and updatedAt
+);
+
+// This helps with "Search" functionality across title and description
+JobSchema.index({ title: 'text', description: 'text' });
+
+const Job = mongoose.model("Job", JobSchema);
+module.exports = Job;

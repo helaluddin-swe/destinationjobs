@@ -1,77 +1,72 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom"; // Import for navigation
+import Navbar from "../../components/Navbar";
 
 const Home = () => {
-  // Toggle between 'candidate' and 'recruiter' views
   const [userRole, setUserRole] = useState("candidate");
-
   const isCandidate = userRole === "candidate";
+  const navigate = useNavigate(); // Hook for programmatic navigation
+
+  const handleCtaClick = () => {
+    if (isCandidate) {
+      navigate("/jobs");
+    } else {
+      navigate("/post-job");
+    }
+  };
 
   return (
     <div className="w-full min-h-screen bg-gray-50 transition-colors duration-300">
       
       {/* NAVBAR */}
-      <nav className="flex items-center justify-between px-10 py-6 bg-white shadow-sm sticky top-0 z-50">
-        <div className="flex items-center gap-4">
-          <h1 className="text-2xl font-black text-blue-600 tracking-tight">DestinationJobs</h1>
-          <div className="hidden md:flex bg-gray-100 p-1 rounded-full ml-6">
-            <button 
-              onClick={() => setUserRole("candidate")}
-              className={`px-4 py-1.5 rounded-full text-sm font-bold transition ${isCandidate ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-            >
-              For Candidates
-            </button>
-            <button 
-              onClick={() => setUserRole("recruiter")}
-              className={`px-4 py-1.5 rounded-full text-sm font-bold transition ${!isCandidate ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-            >
-              For Recruiters
-            </button>
-          </div>
-        </div>
-        
-        <ul className="flex items-center gap-8 font-semibold text-gray-700">
-          <li className="hover:text-blue-600 cursor-pointer hidden sm:block">{isCandidate ? "Browse Jobs" : "Post a Job"}</li>
-          <li className="hover:text-blue-600 cursor-pointer hidden sm:block">Pricing</li>
-          <button className="px-5 py-2 border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition">Login</button>
-          <button className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Sign Up</button>
-        </ul>
-      </nav>
+      <Navbar setUserRole={setUserRole} isCandidate={isCandidate} userRole={userRole}/>
 
       {/* HERO SECTION */}
-      <section className="flex flex-wrap items-center justify-between px-10 py-24 max-w-7xl mx-auto">
-        <div className="max-w-xl">
-          <span className="inline-block px-3 py-1 mb-4 text-xs font-bold tracking-widest text-blue-600 uppercase bg-blue-100 rounded-full">
+      <section className="flex flex-col md:flex-row items-center justify-between px-6 py-16 md:px-10 md:py-24 max-w-6xl mx-auto gap-12">
+        <div className="max-w-xl text-center md:text-left">
+          <span className="inline-block px-3 py-1 mb-6 text-xs font-bold tracking-widest text-blue-600 uppercase bg-blue-100 rounded-full">
             {isCandidate ? "Candidate Portal" : "Recruiter Dashboard"}
           </span>
-          <h2 className="text-6xl font-extrabold leading-tight text-gray-900">
+          
+          <h2 className="text-4xl md:text-6xl font-extrabold leading-tight text-gray-900">
             {isCandidate 
               ? "Find Your Next Career Destination" 
               : "Hire Your Next Engineering Star"}
           </h2>
-          <p className="mt-6 text-xl text-gray-600 leading-relaxed">
+          
+          <p className="mt-6 text-lg md:text-xl text-gray-600 leading-relaxed">
             {isCandidate 
               ? "Explore thousands of jobs from top companies tailored to your skills, passion, and goals." 
               : "Access a pool of 2M+ pre-vetted candidates and streamline your hiring process with AI."}
           </p>
 
-          <div className="mt-10 flex flex-col sm:flex-row gap-4">
+          <div className="mt-10 flex flex-col sm:flex-row justify-center md:justify-start gap-4">
             {isCandidate ? (
               <>
                 <input
                   type="text"
                   placeholder="Job title, keywords..."
-                  className="px-5 py-4 w-full sm:w-80 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition"
+                  className="px-5 py-4 w-full sm:w-80 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
                 />
-                <button className="px-8 py-4 bg-blue-600 text-white rounded-xl font-bold text-lg shadow-lg hover:bg-blue-700 transform hover:-translate-y-1 transition">
+                <button 
+                  onClick={() => navigate("/jobs")} // Navigate to JobList page
+                  className="px-8 py-4 bg-blue-600 text-white rounded-xl font-bold text-lg shadow-lg hover:bg-blue-700 active:scale-95 transition-all"
+                >
                   Search Jobs
                 </button>
               </>
             ) : (
               <>
-                <button className="px-8 py-4 bg-blue-600 text-white rounded-xl font-bold text-lg shadow-lg hover:bg-blue-700 transform hover:-translate-y-1 transition">
+                <button 
+                  onClick={() => navigate("/post-job")} // Navigate to PostJobs page
+                  className="px-8 py-4 bg-blue-600 text-white rounded-xl font-bold text-lg shadow-lg hover:bg-blue-700 active:scale-95 transition-all"
+                >
                   Post a Job for Free
                 </button>
-                <button className="px-8 py-4 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-bold text-lg hover:bg-gray-50 transition">
+                <button 
+                  onClick={() => navigate("/jobs")} // Recruiters can also browse existing jobs
+                  className="px-8 py-4 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-bold text-lg hover:bg-gray-50 active:scale-95 transition-all"
+                >
                   Browse Talent
                 </button>
               </>
@@ -80,14 +75,14 @@ const Home = () => {
         </div>
 
         {/* Hero Image / Graphic */}
-        <div className="hidden lg:block relative">
-          <div className="absolute -top-10 -left-10 w-64 h-64 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
+        <div className="relative w-full max-w-[300px] md:max-w-[450px]">
+          <div className="absolute -top-10 -left-10 w-48 h-48 md:w-64 md:h-64 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
           <img
             src={isCandidate 
               ? "https://cdn-icons-png.flaticon.com/512/942/942748.png" 
               : "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"}
             alt="Hero illustration"
-            className="w-[450px] relative z-10"
+            className="w-full h-auto relative z-10 drop-shadow-2xl"
           />
         </div>
       </section>
@@ -103,7 +98,6 @@ const Home = () => {
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Dynamic Features List */}
             {getFeatures(isCandidate).map((feature, idx) => (
               <div key={idx} className="p-10 border border-gray-100 bg-gray-50 rounded-2xl hover:shadow-xl transition-shadow group">
                 <div className="w-12 h-12 bg-blue-600 text-white rounded-lg flex items-center justify-center mb-6 text-xl group-hover:scale-110 transition">
@@ -122,8 +116,11 @@ const Home = () => {
       {/* CTA SECTION */}
       <section className="bg-blue-600 py-16 px-10 text-center">
         <h2 className="text-3xl font-bold text-white mb-6">Ready to get started?</h2>
-        <button className="px-10 py-4 bg-white text-blue-600 font-bold rounded-full hover:bg-gray-100 transition shadow-xl">
-          Create Your Free Account
+        <button 
+          onClick={handleCtaClick}
+          className="px-10 py-4 bg-white text-blue-600 font-bold rounded-full hover:bg-gray-100 transition shadow-xl"
+        >
+          {isCandidate ? "Browse Listings" : "Start Hiring Now"}
         </button>
       </section>
     </div>

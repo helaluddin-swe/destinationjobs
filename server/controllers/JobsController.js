@@ -2,10 +2,10 @@ const Jobs = require("../models/jobsModels");
 
 exports.getJobs= async (req, res) => {
   try {
-    const { topic } = req.query;
+    const { title } = req.query;
     let query = {};
-    if (topic) {
-      query = { topic: { $in: [topic] } };
+    if (title) {
+      query = { title: { $in: [title] } };
     }
     const getJobsItems = await Jobs.find(query);
     res.json(getJobsItems);
@@ -17,16 +17,12 @@ exports.getJobs= async (req, res) => {
 
 exports.postJobs= async (req, res) => {
   try {
-    const { question, options, answer, prevExams, explanation1,explanation2,hints, topic } = req.body;
+    const { title, company, location, salary, description , employmentType} = req.body;
     const newJobsAdd = new Jobs({
-      question, options, answer, prevExams,
-      explanation1: explanation1 || 'No explanation provided',
-      explanation2: explanation2 || 'No explanation provided',
-      hints: hints || 'No hints provided',
-      topic
-    });
+      title, company, location, salary, description
+,employmentType    });
     await newJobsAdd.save();
-    res.status(201).json({ message: "Item added successfully", data: newJobsAdd });
+    res.status(201).json({ message: "Jobs added successfully", data: newJobsAdd });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -46,7 +42,7 @@ exports.deleteJobsById= async (req, res) => {
   try {
     const deleteJobs = await Jobs.findByIdAndDelete(req.params.id);
     if (!deleteJobs) return res.status(404).json({ message: "Jobs not found" });
-    res.json({ message: "Question successfully deleted", deleteJobs });
+    res.json({ message: "Jobs  successfully deleted", deleteJobs });
   } catch (error) {
     res.status(500).json({ message: 'Invalid id format' });
   }

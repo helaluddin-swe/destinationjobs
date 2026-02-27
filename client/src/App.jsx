@@ -1,25 +1,24 @@
-import React from 'react'
-import { Route, Router, Routes } from 'react-router-dom'
-import GetTest from './pages/backend/GetTest'
-import PostTest from './pages/backend/PostTest'
-import Home from './pages/Home/Home'
-import Dashboard from './pages/dashboard/Dashboard'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
-const App = () => {
+
+import JobList from './components/JobList';
+import PostJobs from './pages/recruiter/PostJobs';
+import Home from './pages/Home/Home';
+import JobDetails from './components/JobDetails';
+
+const App=()=> {
+  
+
   return (
-    <div>
-      
-        <Routes>
-          <Route path='/' element={<Home/>}>
-          <Route index element={<Dashboard/>}/>
-          </Route>
-          <Route path='/backend/get' element={<GetTest/>}/>
-          <Route path='/backend/post' element={<PostTest/>}/>
-        </Routes>
-      
-      
-    </div>
-  )
+   
+    
+      <Routes>
+        <Route path="/" element={<Home/>} />
+        <Route path="/jobs" element={<JobList />} />
+        <Route path="/jobs/:id/:slug" element={<JobDetails/>} />
+        <Route path="/post-job" element={<PostJobs />} />
+      </Routes>
+    
+  );
 }
-
 export default App
