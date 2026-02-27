@@ -2,11 +2,11 @@
   "rewrites": [
     {
       "source": "/api/jobs/:path*",
-      "destination": "https://destinationbcs.vercel.app/api/items/:path*"
+      "destination": "https://helaluddin-swe-destinationjobs-3yzu.vercel.app/api/items/:path*"
     },
     {
       "source": "/api/mcq/:path*",
-      "destination": "https://destinationbcs.vercel.app/api/mcq/:path*"
+      "destination": "hhttps://helaluddin-swe-destinationjobs-3yzu.vercel.app/api/mcq/:path*"
     },
     {
       "source": "/((?!api|items|mcq).*)",

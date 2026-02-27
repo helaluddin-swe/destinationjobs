@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 5175;
 // middlewares
 app.use(express.json());
 app.use(cors({
-  origin: "http://localhost:5173", 
+  origin: "https://helaluddin-swe-destinationjobs.vercel.app/", 
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
