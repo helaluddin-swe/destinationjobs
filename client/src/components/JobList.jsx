@@ -1,153 +1,146 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { NavLink, useNavigate } from 'react-router-dom';
+import { Search, MapPin, DollarSign, Briefcase, ChevronRight, Loader2 } from 'lucide-react';
 
 const JobList = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
 
-  const slugify = (text) => {
-    return text
-      .toString()
-      .trim()
-      .toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^\w-]+/g, '')
-      .replace(/--+/g, '-')
-      .slice(0, 50);
-  };
+  const slugify = (text) => text?.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w-]+/g, '').slice(0, 50);
 
   const fetchJobs = useCallback(async () => {
     setLoading(true);
-    setError(null);
     try {
-      const response = await axios.get('/jobs');
-      if (Array.isArray(response.data)) {
-        setJobs(response.data);
-      } else {
-        throw new Error("Invalid data format received.");
-      }
+      // Ensure this endpoint matches your backend route
+      const { data } = await axios.get('/jobs');
+      setJobs(Array.isArray(data) ? data : []);
     } catch (err) {
-      setError(err.response?.data?.message || err.message || "Something went wrong.");
-    } finally {
-      setLoading(false);
-    }
+      console.error("Fetch error:", err);
+      setJobs([]); 
+    } finally { setLoading(false); }
   }, []);
 
-  useEffect(() => {
-    fetchJobs();
-  }, [fetchJobs]);
+  useEffect(() => { fetchJobs(); }, [fetchJobs]);
 
-  const filteredJobs = (jobs || []).filter(job => 
-    job?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    job?.company?.toLowerCase().includes(searchTerm.toLowerCase())
+  // Enhanced filtering to check Title, Company, and Tech Stack
+  const filteredJobs = jobs.filter(j => 
+    j.title?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    j.company?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    j.techStack?.some(tech => tech.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex flex-col justify-center items-center bg-gray-50">
-        <div className="relative">
-          <div className="h-16 w-16 rounded-full border-4 border-gray-200 border-t-blue-600 animate-spin"></div>
-        </div>
-        <p className="mt-4 text-gray-500 font-semibold tracking-wide">Fetching best roles...</p>
-      </div>
-    );
-  }
+  if (loading) return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+      <Loader2 className="animate-spin text-blue-600 mb-4" size={40} />
+      <p className="text-gray-500 font-medium tracking-wide">Scanning for new opportunities...</p>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB] pb-20">
-      {/* Header & Search Section */}
-      <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm">
-        <div className="max-w-6xl mx-auto px-6 py-6 flex flex-col md:flex-row justify-between items-center gap-6">
+    <div className="min-h-screen bg-gray-50 pb-20">
+      {/* Search Header */}
+      <header className="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-gray-100 py-6 px-6 shadow-sm">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
           <div>
             <h2 className="text-3xl font-black text-gray-900 tracking-tight">Explore Roles</h2>
-            <p className="text-gray-500 text-sm font-medium mt-1">Find your next career move</p>
+            <p className="text-gray-400 text-sm font-medium">Found {filteredJobs.length} matches</p>
           </div>
-          
           <div className="relative w-full md:w-96 group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={18} />
             <input 
               type="text" 
-              placeholder="Search by title or company..."
-              className="w-full pl-12 pr-4 py-3 bg-gray-100 border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all duration-300"
+              placeholder="Search roles, companies, or tech..."
+              className="w-full pl-12 pr-4 py-3 bg-gray-100 rounded-2xl border border-transparent outline-none focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all shadow-inner"
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <svg className="absolute left-4 top-3.5 h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
           </div>
         </div>
-      </div>
+      </header>
 
-      <main className="max-w-6xl mx-auto px-6 mt-10">
-        {filteredJobs.length === 0 ? (
-          <div className="text-center py-24 bg-white rounded-3xl border border-gray-100 shadow-sm">
-            <div className="text-5xl mb-4">🔍</div>
-            <h3 className="text-xl font-bold text-gray-800">No matches found</h3>
-            <p className="text-gray-500">Try adjusting your search terms or filters.</p>
-          </div>
+      {/* Main List */}
+      <main className="max-w-6xl mx-auto px-6 mt-10 space-y-4">
+        {filteredJobs.length > 0 ? (
+          filteredJobs.map((job) => (
+            <NavLink 
+              to={`/jobs/${job._id}/${slugify(job.title)}`} 
+              key={job._id}
+              className="group block bg-white border border-gray-200 rounded-[2rem] p-6 md:p-8 hover:shadow-2xl hover:shadow-blue-900/5 transition-all duration-500 transform hover:-translate-y-1 overflow-hidden relative"
+            >
+              {/* Subtle hover accent */}
+              <div className="absolute top-0 left-0 w-2 h-full bg-blue-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+              
+              <div className="flex flex-col md:flex-row gap-6 items-start">
+                {/* Company Logo */}
+                <div className="relative">
+                  <img 
+                    src={job.company?.logo || `https://ui-avatars.com/api/?name=${job.company?.name}`} 
+                    alt={job.company?.name} 
+                    className="w-16 h-16 rounded-2xl border border-gray-100 object-cover shadow-sm group-hover:scale-110 transition-transform duration-500" 
+                  />
+                  {job.location?.type === 'Remote' && (
+                    <span className="absolute -top-2 -right-2 bg-green-500 w-4 h-4 rounded-full border-2 border-white" title="Remote Available" />
+                  )}
+                </div>
+
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg uppercase tracking-wider">
+                      {job.employmentDetails?.type || 'Full-time'}
+                    </span>
+                    <span className="text-gray-300 text-xs font-bold">•</span>
+                    <span className="text-gray-500 text-xs font-bold flex items-center gap-1">
+                      <MapPin size={12} className="text-blue-400"/> {job.location?.city}, {job.location?.state}
+                    </span>
+                  </div>
+                  
+                  <h3 className="text-2xl font-extrabold text-gray-900 group-hover:text-blue-600 transition-colors leading-tight mb-1">
+                    {job.title}
+                  </h3>
+                  <p className="text-gray-500 font-bold text-sm uppercase tracking-wide mb-4">{job.company?.name}</p>
+                  
+                  {/* Tech Preview */}
+                  <div className="flex flex-wrap gap-2">
+                    {job.techStack?.slice(0, 4).map(tech => (
+                      <span key={tech} className="text-[10px] bg-gray-50 text-gray-500 px-3 py-1.5 rounded-xl font-black border border-gray-100 group-hover:border-blue-100 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Right Side: Compensation */}
+                <div className="text-right flex flex-col items-end justify-between self-stretch w-full md:w-auto pt-4 md:pt-0 border-t md:border-t-0 border-gray-50">
+                  <div className="mb-4">
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Estimated Range</p>
+                    <p className="text-xl font-black text-gray-900 leading-none">
+                      ${(job.compensation?.min / 1000).toFixed(0)}k — ${(job.compensation?.max / 1000).toFixed(0)}k
+                    </p>
+                    <p className="text-[10px] text-gray-400 font-bold italic mt-1">{job.compensation?.currency || 'USD'} / Year</p>
+                  </div>
+                  
+                  <button className="w-full md:w-auto bg-gray-900 group-hover:bg-blue-600 text-white px-8 py-3 rounded-2xl text-sm font-black flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-blue-200">
+                    View Details <ChevronRight size={16}/>
+                  </button>
+                </div>
+              </div>
+            </NavLink>
+          ))
         ) : (
-          <div className="grid grid-cols-1 gap-5">
-            {filteredJobs.map((job) => (
-              <NavLink  to={ `/jobs/${job._id}/${slugify(job.title)}`}
-                key={job._id || job.id} 
-                className="group relative bg-white border border-gray-100 rounded-3xl p-6 hover:shadow-[0_20px_50px_rgba(0,0,0,0.05)] hover:border-blue-100 transition-all duration-300 overflow-hidden"
-              >
-                {/* Visual Accent */}
-                <div className="absolute top-0 left-0 w-1 h-full bg-transparent group-hover:bg-blue-600 transition-all duration-300" />
-
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                  {/* Left: Info */}
-                  <div className="flex items-start gap-5">
-                    <div className="h-14 w-14 rounded-2xl bg-linear-to-br from-gray-900 to-gray-700 flex items-center justify-center text-white font-bold text-xl shadow-inner shrink-0">
-                      {job.company?.charAt(0)}
-                    </div>
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2 mb-1">
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">
-                          {job.employmentType || 'Full-Time'}
-                        </span>
-                        <span className="text-gray-400 text-xs">•</span>
-                        <span className="text-gray-500 text-xs font-medium italic">📍 {job.location}</span>
-                      </div>
-                      <h3 className="text-xl font-bold text-gray-900 leading-tight group-hover:text-blue-600 transition-colors">
-                        {job.title}
-                      </h3>
-                      <p className="text-gray-600 font-medium">{job.company}</p>
-                    </div>
-                  </div>
-
-                  {/* Right: Salary & Actions */}
-                  <div className="flex flex-row lg:flex-col items-center lg:items-end justify-between lg:justify-center gap-4 border-t lg:border-t-0 pt-4 lg:pt-0">
-                    <div className="text-left lg:text-right">
-                      <p className="text-sm font-semibold text-gray-400 uppercase tracking-tighter">Compensation</p>
-                      <p className="text-lg font-black text-gray-900">{job.salary || 'Negotiable'}</p>
-                    </div>
-                    
-                    <div className="flex gap-2">
-                      <button 
-                        onClick={() => navigate(`/jobs/${job._id}/${slugify(job.title)}`)}
-                        className="px-6 py-2.5 bg-gray-50 text-gray-900 font-bold rounded-xl hover:bg-gray-200 transition-colors text-sm"
-                      >
-                        Details
-                      </button>
-                      <button className="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-200 transition-all transform active:scale-95 text-sm">
-                        Apply
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Footer snippet */}
-                <div className="mt-6 pt-5 border-t border-gray-50">
-                  <p className="text-gray-500 text-sm line-clamp-2 leading-relaxed">
-                    {job.description}
-                  </p>
-                </div>
-              </NavLink>
-            ))}
+          <div className="text-center py-20 bg-white rounded-4xl border-2 border-dashed border-gray-200">
+            <div className="bg-gray-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Search className="text-gray-400" size={32} />
+            </div>
+            <h3 className="text-xl font-bold text-gray-800">No roles found matching "{searchTerm}"</h3>
+            <p className="text-gray-500 mt-2">Try searching for a different technology or location.</p>
+            <button 
+              onClick={() => setSearchTerm('')} 
+              className="mt-6 text-blue-600 font-bold hover:underline"
+            >
+              Clear all filters
+            </button>
           </div>
         )}
       </main>

@@ -7,44 +7,73 @@ const JobSchema = new Schema(
       type: String,
       required: [true, "Job title is required"],
       trim: true,
-      index: true, // Makes searching by title faster
+      index: true,
     },
-    company: { 
-      type: String, // Changed from array to String
-      required: [true, "Company name is required"],
-      trim: true 
-    },
-    location: {
-      type: String, // Changed to String for easier filtering
-      required: [true, "Location is required"],
-      default: "Remote",
+    slug: {
+      type: String,
+      lowercase: true,
       trim: true,
     },
-    salary: { 
-      type: String, 
-      trim: true 
+    status: {
+      type: String,
+      enum: ["Active", "Closed", "Urgent"],
+      default: "Active",
     },
+    company: {
+      name: { type: String, required: true },
+      logo: { type: String },
+      website: { type: String },
+      industry: { type: String },
+    },
+    location: {
+      city: { type: String, required: true },
+      state: { type: String },
+      type: { 
+        type: String, 
+        enum: ["Remote", "On-site", "Hybrid"], 
+        default: "Remote" 
+      },
+    },
+    compensation: {
+      min: { type: Number, required: true },
+      max: { type: Number, required: true },
+      currency: { type: String, default: "USD" },
+      bonus: { type: String },
+    },
+    employmentDetails: {
+      type: { type: String, default: "Full-time" },
+      experienceLevel: { type: String },
+      department: { type: String },
+    },
+    techStack: [{ type: String }],
     description: { 
       type: String, 
-      required: [true, "Description is required"],
-      trim: true 
+      required: [true, "Description is required"] 
     },
-    // Useful additions for a real app:
-    employmentType: {
-      type: String,
-      enum: ["Full-time", "Part-time", "Contract", "Internship"],
-      default: "Full-time"
+    responsibilities: [{ type: String }],
+    benefits: [{ type: String }],
+    applicationProcess: {
+      steps: [{ type: String }],
+      applyUrl: { type: String },
     },
-    isApplied: {
-      type: Boolean,
-      default: false
-    }
   },
-  { timestamps: true } // Automatically creates createdAt and updatedAt
+  { 
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+  }
 );
 
-// This helps with "Search" functionality across title and description
-JobSchema.index({ title: 'text', description: 'text' });
+// Middleware to auto-slugify the title
+JobSchema.pre('save', function(next) {
+  if (this.title && this.isModified('title')) {
+    this.slug = this.title.toLowerCase().split(' ').join('-');
+  }
+  next();
+});
+
+// Full-text search index
+JobSchema.index({ title: 'text', description: 'text', 'company.name': 'text' });
 
 const Job = mongoose.model("Job", JobSchema);
 module.exports = Job;
