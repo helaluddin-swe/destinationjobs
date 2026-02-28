@@ -52,7 +52,7 @@ const JobDetails = () => {
             <InfoItem icon={<MapPin/>} label="Location" val={`${job.location.city}, ${job.location.state}`} sub={job.location.type} />
             <InfoItem icon={<DollarSign/>} label="Salary (USD)" val={`$${job.compensation.min/1000}k - $${job.compensation.max/1000}k`} sub={job.compensation.bonus} />
             <InfoItem icon={<Briefcase/>} label="Level" val={job.employmentDetails.experienceLevel} sub={job.employmentDetails.type} />
-            <InfoItem icon={<Calendar/>} label="Posted" val={new Date(job.postedAt.$date).toLocaleDateString()} sub={job.employmentDetails.department} />
+            <InfoItem icon={<Calendar/>} label="Posted" val={new Date(job.postedAt).toLocaleDateString()} sub={job.employmentDetails.department} />
           </div>
         </div>
 
