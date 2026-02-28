@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import axios from "axios";
 import { Plus, X, Briefcase, DollarSign, MapPin, Building2, Link, ListChecks, Heart, Send, Sparkles } from 'lucide-react';
+const API_BASE = import.meta.env.VITE_API_URL
+  ? "https://helaluddin-swe-destinationjobs-3yzu.vercel.app" 
+  : ""; // Empty string uses the Proxy in development
 
 const INITIAL_STATE = {
   title: '',
@@ -70,7 +73,7 @@ const PostJobs = () => {
       };
 
       // Replace with your actual API endpoint
-      await axios.post('/jobs', payload);
+      await axios.post(`${API_BASE}/jobs`, payload);
       
       setMessage({ text: 'Job Published Successfully! 🚀', type: 'success' });
       setFormData(INITIAL_STATE); // Reset form on success

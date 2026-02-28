@@ -8,6 +8,9 @@ const JobList = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
+  const API_BASE = import.meta.env.VITE_API_URL
+  ? "https://helaluddin-swe-destinationjobs-3yzu.vercel.app" 
+  : ""; // Empty string uses the Proxy in development
 
   const slugify = (text) => text?.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w-]+/g, '').slice(0, 50);
 
@@ -15,7 +18,7 @@ const JobList = () => {
     setLoading(true);
     try {
       // Ensure this endpoint matches your backend route
-      const { data } = await axios.get('/jobs');
+      const { data } = await axios.get(`${API_BASE}/jobs`);
       setJobs(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Fetch error:", err);
