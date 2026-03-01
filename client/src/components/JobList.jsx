@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink} from 'react-router-dom';
 import { Search, MapPin, DollarSign, Briefcase, ChevronRight, Loader2 } from 'lucide-react';
 import { useAppContext } from '../context/UseAppContext';
 
@@ -13,16 +13,20 @@ const JobList = () => {
   const slugify = (text) => text?.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w-]+/g, '').slice(0, 50);
 
   const fetchJobs = useCallback(async () => {
+    // Safety check: Don't fetch if backendUrl isn't loaded yet
+    if (!backendUrl) return;
+
     setLoading(true);
     try {
-      // Ensure this endpoint matches your backend route
       const { data } = await axios.get(`${backendUrl}/jobs`);
       setJobs(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Fetch error:", err);
       setJobs([]); 
-    } finally { setLoading(false); }
-  }, []);
+    } finally {
+      setLoading(false);
+    }
+  }, [backendUrl]);
 
   useEffect(() => { fetchJobs(); }, [fetchJobs]);
 
