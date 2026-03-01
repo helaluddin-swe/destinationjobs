@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from "axios";
 import { Plus, X, Briefcase, DollarSign, MapPin, Building2, Link, ListChecks, Heart, Send, Sparkles } from 'lucide-react';
+import { useAppContext } from '../../context/UseAppContext';
 const API_BASE = import.meta.env.VITE_API_URL
   ? "https://helaluddin-swe-destinationjobs-3yzu.vercel.app" 
   : ""; // Empty string uses the Proxy in development
@@ -23,6 +24,7 @@ const PostJobs = () => {
   const [formData, setFormData] = useState(INITIAL_STATE);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
+  const {backendUrl}=useAppContext()
 
   // Handle nested object updates (up to 3 levels)
   const handleNestedChange = (e) => {
@@ -73,7 +75,7 @@ const PostJobs = () => {
       };
 
       // Replace with your actual API endpoint
-      await axios.post(`${API_BASE}/jobs`, payload);
+      await axios.post(`${backendUrl}/jobs`, payload);
       
       setMessage({ text: 'Job Published Successfully! 🚀', type: 'success' });
       setFormData(INITIAL_STATE); // Reset form on success

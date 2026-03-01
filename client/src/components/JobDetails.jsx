@@ -1,21 +1,21 @@
 import React, { useEffect, useState } from 'react';
-const API_BASE = import.meta.env.VITE_API_URL
-  ? "https://helaluddin-swe-destinationjobs-3yzu.vercel.app" 
-  : ""; // Empty string uses the Proxy in development
+
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from "axios";
 import { MapPin, DollarSign, Briefcase, Calendar, CheckCircle2, ChevronLeft, Globe } from 'lucide-react';
+import { useAppContext } from '../context/UseAppContext';
 
 const JobDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
+  const {backendUrl}=useAppContext()
 
   useEffect(() => {
     const fetchJob = async () => {
       try {
-        const { data } = await axios.get(`${API_BASE}/jobs/${id}`);
+        const { data } = await axios.get(`${backendUrl}/jobs/${id}`);
         setJob(data);
       } catch (err) { console.error(err); }
       finally { setLoading(false); }

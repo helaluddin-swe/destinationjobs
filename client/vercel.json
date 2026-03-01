@@ -1,13 +1,8 @@
-{
-  "rewrites": [
-    {
-      "source": "/jobs/:path*",
-      "destination": "https://helaluddin-swe-destinationjobs-3yzu.vercel.app/jobs/:path*"
-    },
-   
-    {
-      "source": "/((?!jobs|jobs).*)",
-      "destination": "/"
-    }
-  ]
-}
+  {
+    "rewrites": [
+      {
+        "source": "/(.*)",
+        "destination": "/"
+      }
+    ]
+  }
