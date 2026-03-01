@@ -1,14 +1,23 @@
 const mongoose = require('mongoose');
 
-const uri = process.env.MONGO_URI || 'mongodb+srv://destinationjob:destinationjob@cluster0.gn8kjzf.mongodb.net/?appName=Cluster0'
-
 const connectDB = async () => {
   try {
-    await mongoose.connect(uri);
-    console.log('Connected to MongoDB Atlas');
+    // 1. Set up the listener first
+    // Use a function reference or an arrow function
+    mongoose.connection.on('connected', () => {
+      console.log("Database connected successfully");
+    });
+
+    mongoose.connection.on('error', (err) => {
+      console.error(`Mongoose connection error: ${err}`);
+    });
+
+    // 2. Then attempt the connection
+    await mongoose.connect(`${process.env.MONGO_URI}/jobdb`);
+    
   } catch (err) {
     console.error('Failed to connect to MongoDB:', err.message);
-    process.exit(1); // stop server if DB connection fails
+    process.exit(1); 
   }
 };
 
