@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import axios from "axios";
-import { Plus, X, Briefcase, DollarSign, MapPin, Building2, Link, ListChecks, Heart, Send, Sparkles } from 'lucide-react';
+import { 
+  Plus, X, Briefcase, DollarSign, MapPin, Building2, 
+  Send, Sparkles, ListChecks, Heart, Globe, Layers 
+} from 'lucide-react';
 import { useAppContext } from '../../context/UseAppContext';
-const API_BASE = import.meta.env.VITE_API_URL
-  ? "https://helaluddin-swe-destinationjobs-3yzu.vercel.app" 
-  : ""; // Empty string uses the Proxy in development
 
 const INITIAL_STATE = {
   title: '',
@@ -24,19 +24,18 @@ const PostJobs = () => {
   const [formData, setFormData] = useState(INITIAL_STATE);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
-  const {backendUrl}=useAppContext()
+  const { backendUrl } = useAppContext();
 
-  // Handle nested object updates (up to 3 levels)
+  // Helper to handle deeply nested object updates
   const handleNestedChange = (e) => {
     const { name, value } = e.target;
     const keys = name.split('.');
 
     setFormData(prev => {
-      const newData = { ...prev };
+      const newData = JSON.parse(JSON.stringify(prev)); // Deep clone
       let current = newData;
 
       for (let i = 0; i < keys.length - 1; i++) {
-        current[keys[i]] = { ...current[keys[i]] };
         current = current[keys[i]];
       }
       
@@ -45,6 +44,7 @@ const PostJobs = () => {
     });
   };
 
+  // Array Handlers
   const addItem = (field) => setFormData(prev => ({ ...prev, [field]: [...prev[field], ""] }));
   
   const removeItem = (field, index) => setFormData(prev => ({
@@ -63,26 +63,35 @@ const PostJobs = () => {
     setLoading(true);
     setMessage({ text: '', type: '' });
 
+    // Validation
+    if (parseInt(formData.compensation.min) > parseInt(formData.compensation.max)) {
+      setMessage({ text: "Minimum salary cannot be higher than maximum.", type: "error" });
+      setLoading(false);
+      return;
+    }
+
     try {
       const payload = {
         ...formData,
         compensation: {
           ...formData.compensation,
-          min: Number(formData.compensation.min) || 0,
-          max: Number(formData.compensation.max) || 0
+          min: Number(formData.compensation.min),
+          max: Number(formData.compensation.max)
         },
-        postedAt: new Date().toISOString()
+        // Filter out empty entries in arrays
+        techStack: formData.techStack.filter(s => s.trim() !== ""),
+        responsibilities: formData.responsibilities.filter(r => r.trim() !== ""),
+        benefits: formData.benefits.filter(b => b.trim() !== "")
       };
 
-      // Replace with your actual API endpoint
       await axios.post(`${backendUrl}/jobs`, payload);
       
       setMessage({ text: 'Job Published Successfully! 🚀', type: 'success' });
-      setFormData(INITIAL_STATE); // Reset form on success
+      setFormData(INITIAL_STATE);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
       setMessage({ 
-        text: error.response?.data?.message || 'Failed to post job. Please try again.', 
+        text: error.response?.data?.message || 'Server error. Please try again.', 
         type: 'error' 
       });
     } finally {
@@ -109,10 +118,9 @@ const PostJobs = () => {
 
         <div className="p-8 md:p-12">
           {message.text && (
-            <div className={`mb-10 p-5 rounded-2xl flex items-center gap-3 animate-bounce ${
+            <div className={`mb-10 p-5 rounded-2xl flex items-center gap-3 ${
               message.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'
             }`}>
-              <div className={`w-2 h-2 rounded-full ${message.type === 'success' ? 'bg-green-500' : 'bg-red-500'}`} />
               <span className="font-bold">{message.text}</span>
             </div>
           )}
@@ -127,10 +135,10 @@ const PostJobs = () => {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <InputGroup label="Job Title" name="title" value={formData.title} onChange={handleNestedChange} placeholder="e.g. Senior Product Designer" required />
-                <InputGroup label="Company Name" name="company.name" value={formData.company.name} onChange={handleNestedChange} placeholder="e.g. Acme Corp" required />
-                <InputGroup label="Logo URL" name="company.logo" value={formData.company.logo} onChange={handleNestedChange} placeholder="https://logo.com/img.png" />
-                <InputGroup label="Apply Link" name="applicationProcess.applyUrl" value={formData.applicationProcess.applyUrl} onChange={handleNestedChange} placeholder="https://careers.company.com/job-1" required />
+                <InputGroup label="Job Title" name="title" value={formData.title} onChange={handleNestedChange} placeholder="e.g. Senior Backend Engineer" required />
+                <InputGroup label="Company Name" name="company.name" value={formData.company.name} onChange={handleNestedChange} placeholder="e.g. TechFlow Inc" required />
+                <InputGroup label="Logo URL" name="company.logo" value={formData.company.logo} onChange={handleNestedChange} placeholder="https://path-to-logo.png" />
+                <InputGroup label="Apply Link" name="applicationProcess.applyUrl" value={formData.applicationProcess.applyUrl} onChange={handleNestedChange} placeholder="https://careers.company.com" required />
               </div>
             </section>
 
@@ -145,17 +153,17 @@ const PostJobs = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <InputGroup label="Location Type" name="location.type" value={formData.location.type} onChange={handleNestedChange} type="select" options={['Remote', 'On-site', 'Hybrid']} />
-                <InputGroup label="City" name="location.city" value={formData.location.city} onChange={handleNestedChange} placeholder="e.g. New York" />
-                <InputGroup label="Min Salary" name="compensation.min" value={formData.compensation.min} onChange={handleNestedChange} type="number" placeholder="0" />
-                <InputGroup label="Max Salary" name="compensation.max" value={formData.compensation.max} onChange={handleNestedChange} type="number" placeholder="0" />
-                <InputGroup label="Experience" name="employmentDetails.experienceLevel" value={formData.employmentDetails.experienceLevel} onChange={handleNestedChange} placeholder="e.g. 3-5 Years" />
+                <InputGroup label="City" name="location.city" value={formData.location.city} onChange={handleNestedChange} placeholder="e.g. San Francisco" required />
+                <InputGroup label="Min Salary ($)" name="compensation.min" value={formData.compensation.min} onChange={handleNestedChange} type="number" placeholder="70000" required />
+                <InputGroup label="Max Salary ($)" name="compensation.max" value={formData.compensation.max} onChange={handleNestedChange} type="number" placeholder="120000" required />
+                <InputGroup label="Experience" name="employmentDetails.experienceLevel" value={formData.employmentDetails.experienceLevel} onChange={handleNestedChange} placeholder="e.g. Mid-Senior" />
                 <InputGroup label="Employment Type" name="employmentDetails.type" value={formData.employmentDetails.type} onChange={handleNestedChange} type="select" options={['Full-time', 'Contract', 'Part-time', 'Freelance']} />
               </div>
             </section>
 
             {/* Section 3: Dynamic Lists */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-              <ArrayInput label="Tech Stack" field="techStack" items={formData.techStack} onAdd={addItem} onRemove={removeItem} onChange={handleArrayChange} icon={<Sparkles size={14}/>} />
+              <ArrayInput label="Tech Stack" field="techStack" items={formData.techStack} onAdd={addItem} onRemove={removeItem} onChange={handleArrayChange} icon={<Layers size={14}/>} />
               <ArrayInput label="Responsibilities" field="responsibilities" items={formData.responsibilities} onAdd={addItem} onRemove={removeItem} onChange={handleArrayChange} icon={<ListChecks size={14}/>} />
             </div>
 
@@ -171,20 +179,19 @@ const PostJobs = () => {
                 value={formData.description} 
                 onChange={handleNestedChange} 
                 rows="6"
+                required
                 className="w-full px-6 py-4 rounded-2xl border-2 border-gray-100 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 outline-none transition-all resize-none text-gray-700 leading-relaxed"
-                placeholder="What makes this role unique? Describe the team, the mission, and the impact..."
+                placeholder="Describe the mission and the impact of this role..."
               />
             </section>
 
             <button 
               type="submit" 
               disabled={loading}
-              className="group relative w-full py-6 bg-blue-600 hover:bg-blue-700 text-white font-black text-xl rounded-2xl transition-all shadow-xl hover:shadow-blue-200 active:scale-[0.98] disabled:bg-gray-200 disabled:shadow-none overflow-hidden"
+              className="group relative w-full py-6 bg-blue-600 hover:bg-blue-700 text-white font-black text-xl rounded-2xl transition-all shadow-xl hover:shadow-blue-200 active:scale-[0.98] disabled:bg-gray-300 overflow-hidden"
             >
               <span className="relative z-10 flex items-center justify-center gap-3">
-                {loading ? 'Processing...' : (
-                  <>Publish Job Position <Send size={20} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" /></>
-                )}
+                {loading ? 'Publishing...' : <><Send size={20} /> Publish Job Position</>}
               </span>
             </button>
           </form>
@@ -199,52 +206,37 @@ const InputGroup = ({ label, type = "text", options, ...props }) => (
   <div className="space-y-2">
     <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">{label}</label>
     {type === "select" ? (
-      <select {...props} className="w-full px-5 py-3.5 rounded-xl border-2 border-gray-50 bg-gray-50 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 outline-none transition-all appearance-none font-medium text-gray-700 cursor-pointer">
+      <select {...props} className="w-full px-5 py-3.5 rounded-xl border-2 border-gray-50 bg-gray-50 focus:bg-white focus:border-blue-500 outline-none transition-all font-medium text-gray-700 cursor-pointer">
         {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
       </select>
     ) : (
-      <input type={type} {...props} className="w-full px-5 py-3.5 rounded-xl border-2 border-gray-50 bg-gray-50 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 outline-none transition-all font-medium text-gray-700 placeholder:text-gray-300" />
+      <input type={type} {...props} className="w-full px-5 py-3.5 rounded-xl border-2 border-gray-50 bg-gray-50 focus:bg-white focus:border-blue-500 outline-none transition-all font-medium text-gray-700" />
     )}
   </div>
 );
 
 const ArrayInput = ({ label, field, items, onAdd, onRemove, onChange, icon }) => (
-  <div className="bg-gray-50/50 p-8 rounded-3xl border-2 border-gray-50 space-y-4">
+  <div className="bg-gray-50/50 p-6 rounded-3xl border-2 border-gray-50 space-y-4">
     <div className="flex justify-between items-center">
-      <h4 className="flex items-center gap-2 text-sm font-black text-gray-600 uppercase tracking-tight">
+      <h4 className="flex items-center gap-2 text-sm font-black text-gray-600 uppercase">
         {icon} {label}
       </h4>
-      <button 
-        type="button" 
-        onClick={() => onAdd(field)} 
-        className="flex items-center gap-1 px-3 py-1.5 bg-white text-blue-600 text-xs font-bold rounded-lg border border-blue-100 hover:bg-blue-600 hover:text-white transition-all shadow-sm"
-      >
+      <button type="button" onClick={() => onAdd(field)} className="flex items-center gap-1 px-3 py-1.5 bg-white text-blue-600 text-xs font-bold rounded-lg border border-blue-100 hover:bg-blue-600 hover:text-white transition-all">
         <Plus size={14} /> Add
       </button>
     </div>
     <div className="space-y-3">
       {items.map((item, idx) => (
-        <div key={idx} className="flex gap-2 group animate-in fade-in slide-in-from-left-2">
+        <div key={idx} className="flex gap-2">
           <input 
             value={item} 
             onChange={(e) => onChange(field, idx, e.target.value)}
             placeholder={`Enter ${label.toLowerCase()}...`}
-            className="flex-1 px-4 py-3 rounded-xl border border-gray-200 bg-white focus:border-blue-400 outline-none text-sm transition-all shadow-sm group-hover:border-gray-300" 
+            className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 bg-white focus:border-blue-400 outline-none text-sm" 
           />
-          <button 
-            type="button" 
-            onClick={() => onRemove(field, idx)} 
-            className="p-3 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
-          >
-            <X size={18} />
-          </button>
+          <button type="button" onClick={() => onRemove(field, idx)} className="p-2.5 text-gray-300 hover:text-red-500"><X size={18} /></button>
         </div>
       ))}
-      {items.length === 0 && (
-        <div className="py-8 text-center border-2 border-dashed border-gray-200 rounded-2xl">
-          <p className="text-xs text-gray-400 font-medium italic">No items added to {label} yet.</p>
-        </div>
-      )}
     </div>
   </div>
 );

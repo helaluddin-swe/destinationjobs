@@ -64,16 +64,27 @@ const JobSchema = new Schema(
   }
 );
 
-// Middleware to auto-slugify the title
 JobSchema.pre('save', function(next) {
   if (this.title && this.isModified('title')) {
-    this.slug = this.title.toLowerCase().split(' ').join('-');
+    // Better slugify: removes special characters, handles multiple spaces
+    this.slug = this.title
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, '') // Remove non-word chars
+      .replace(/[\s_-]+/g, '-') // Replace spaces/underscores with -
+      .replace(/^-+|-+$/g, ''); // Trim - from ends
+      
+    // Add a short random ID to the slug to ensure uniqueness
+    const shortId = Math.random().toString(36).substring(2, 7);
+    this.slug = `${this.slug}-${shortId}`;
   }
   next();
 });
 
-// Full-text search index
-JobSchema.index({ title: 'text', description: 'text', 'company.name': 'text' });
+// Add a Virtual for "Salary Range" string
+JobSchema.virtual('salaryRange').get(function() {
+  return `${this.compensation.currency} ${this.compensation.min.toLocaleString()} - ${this.compensation.max.toLocaleString()}`;
+});
 
 const Job = mongoose.model("Job", JobSchema);
 module.exports = Job;
