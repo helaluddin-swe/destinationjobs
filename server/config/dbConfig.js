@@ -2,18 +2,16 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
   try {
-    // 1. Set up the listener first
-    // Use a function reference or an arrow function
     mongoose.connection.on('connected', () => {
-      console.log("Database connected successfully");
+      console.log("Database connected successfully to 'jobdb'");
     });
 
     mongoose.connection.on('error', (err) => {
       console.error(`Mongoose connection error: ${err}`);
     });
 
-    // 2. Then attempt the connection
-    await mongoose.connect(`${process.env.MONGO_URI}/jobdb`);
+    // Just pass the URI directly since the DB name is now inside it
+    await mongoose.connect(process.env.MONGO_URI);
     
   } catch (err) {
     console.error('Failed to connect to MongoDB:', err.message);

@@ -1,18 +1,21 @@
+// 1. Load environment variables IMMEDIATELY
+require("dotenv").config(); 
+
 const express = require("express");
 const cors = require("cors");
-const dotenv = require("dotenv");
 const connectDB = require("./config/dbConfig");
 const jobsRoutes = require("./routes/jobsRoutes.js");
-
-dotenv.config();
+const resumeAnalysisRoutes = require("./routes/resumeRoutes.js");
 
 const app = express();
-const PORT = process.env.PORT || 5175;
 
-// 1. Connect to MongoDB first
+// Use a fallback value if process.env.PORT is missing
+const PORT = process.env.PORT || 5176 
+
+// 2. Connect to MongoDB
 connectDB();
 
-// 2. Middlewares
+// 3. Middlewares
 app.use(express.json());
 app.use(cors({
   origin: "https://helaluddin-swe-destinationjobs.vercel.app", 
@@ -20,26 +23,10 @@ app.use(cors({
   credentials: true
 }));
 
-// 3. Health Check (Useful for monitoring)
-app.get("/", (req, res) => {
-  res.send("DestinationJobs API is running... 🚀");
-});
-
 // 4. Routes
-// Using /api prefix is standard practice
-app.use( jobsRoutes);
-
-// 5. Global 404 Handler
-app.use((req, res) => {
-  res.status(404).json({ message: "Route not found" });
-});
-
-// 6. Global Error Handler
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: "Something went wrong on the server" });
-});
+app.use(jobsRoutes);
+app.use('/api', resumeAnalysisRoutes);
 
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server running on http://localhost:${PORT} 🚀`);
 });
