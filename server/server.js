@@ -10,7 +10,7 @@ const resumeAnalysisRoutes = require("./routes/resumeRoutes.js");
 const app = express();
 
 // Use a fallback value if process.env.PORT is missing
-const PORT = process.env.PORT || 5176 
+const PORT = process.env.PORT 
 
 // 2. Connect to MongoDB
 connectDB();
@@ -18,11 +18,14 @@ connectDB();
 // 3. Middlewares
 app.use(express.json());
 app.use(cors({
-  origin: "https://helaluddin-swe-destinationjobs.vercel.app", 
+  origin: ["https://helaluddin-swe-destinationjobs.vercel.app","http://localhost:5173"] ,
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
 
+app.get('/',(req,res)=>{
+  res.send("API is running")
+})
 // 4. Routes
 app.use(jobsRoutes);
 app.use('/api', resumeAnalysisRoutes);
