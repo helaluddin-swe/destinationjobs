@@ -18,7 +18,7 @@ const JobList = () => {
 
     setLoading(true);
     try {
-      const { data } = await axios.get(`${backendUrl}/jobs`);
+      const { data } = await axios.get(`${backendUrl}/api/jobs`);
       setJobs(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Fetch error:", err);

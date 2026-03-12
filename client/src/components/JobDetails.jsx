@@ -15,7 +15,7 @@ const JobDetails = () => {
   useEffect(() => {
     const fetchJob = async () => {
       try {
-        const { data } = await axios.get(`${backendUrl}/jobs/${id}`);
+        const { data } = await axios.get(`${backendUrl}/api/jobs/${id}`);
         setJob(data);
       } catch (err) { console.error(err); }
       finally { setLoading(false); }
