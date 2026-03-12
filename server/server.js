@@ -33,7 +33,7 @@ app.get('/', (req, res) => {
 
 // 4. Routes
 // It's best practice to prefix all API routes to avoid conflicts with frontend paths
-app.use('/api/jobs', jobsRoutes); 
+app.use('/api', jobsRoutes); 
 app.use('/api/resumes', resumeAnalysisRoutes);
 
 // 5. Global Error Handler (Crucial for a "workable" production app)

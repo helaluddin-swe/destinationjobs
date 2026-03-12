@@ -84,7 +84,7 @@ const PostJobs = () => {
         benefits: formData.benefits.filter(b => b.trim() !== "")
       };
 
-      await axios.post(`${backendUrl}/jobs`, payload);
+      await axios.post(`${backendUrl}/api/jobs`, payload);
       
       setMessage({ text: 'Job Published Successfully! 🚀', type: 'success' });
       setFormData(INITIAL_STATE);

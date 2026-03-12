@@ -4,7 +4,7 @@ import { createContext, useContext, useMemo } from "react";
 const AppContext = createContext();
 
 const ContextProvider = ({ children }) => {
-  const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:5175";
+  const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:5175/api";
 
   // 2. Memoize the value to prevent unnecessary rerenders
   const value = useMemo(() => ({
